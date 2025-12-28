@@ -2,19 +2,6 @@ const CACHE_NAME = 'wonderkidz-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/index.tsx',
-  '/App.tsx',
-  '/types.ts',
-  '/components/Onboarding.tsx',
-  '/components/ui/Button.tsx',
-  '/components/activities/Alphabet.tsx',
-  '/components/activities/Colors.tsx',
-  '/components/activities/Identify.tsx',
-  '/components/activities/Logic.tsx',
-  '/components/activities/Memory.tsx',
-  '/components/activities/Numbers.tsx',
-  '/components/activities/Shapes.tsx',
-  '/services/gemini.ts',
 ];
 
 // Install event - cache resources
@@ -45,33 +32,34 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Cache hit - return response
-      if (response) {
-        return response;
-      }
-
-      // Clone the request
-      const fetchRequest = event.request.clone();
-
-      return fetch(fetchRequest).then((response) => {
+    fetch(event.request)
+      .then((response) => {
         // Check if valid response
-        if (!response || response.status !== 200 || response.type !== 'basic') {
+        if (!response || response.status !== 200) {
           return response;
         }
 
-        // Clone the response
+        // Clone and cache the response
         const responseToCache = response.clone();
-
         caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, responseToCache);
         });
 
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        // Network failed, try cache
+        return caches.match(event.request).then((response) => {
+          return response || caches.match('/index.html');
+        });
+      })
   );
 });
