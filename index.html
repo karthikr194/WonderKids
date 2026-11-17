@@ -1,45 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="description" content="WonderKidz - Interactive learning app for kids with fun activities" />
-    <meta name="theme-color" content="#F59E0B" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="WonderKids – phonics, number words, reading and more for children aged 2–8." />
+    <meta name="theme-color" content="#FFF6E5" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="WonderKidz" />
+    <meta name="apple-mobile-web-app-title" content="WonderKids" />
     <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
-    <title>WonderKidz - Smart Learning</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Fredoka', sans-serif;
-        background-color: #FEF9C3; /* yellow-50 */
-        overscroll-behavior: none;
-      }
-      /* Hide scrollbar for clean UI */
-      ::-webkit-scrollbar {
-        display: none;
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "framer-motion": "https://esm.sh/framer-motion@^12.23.26",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "canvas-confetti": "https://esm.sh/canvas-confetti@^1.9.4"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
+    <title>WonderKids – Smart Learning</title>
+  </head>
   <body>
     <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
