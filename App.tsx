@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Learning } from './components/activities/Learning';
 import { Onboarding } from './components/Onboarding';
 import { Alphabet } from './components/activities/Alphabet';
 import { Numbers } from './components/activities/Numbers';
@@ -16,7 +17,7 @@ const STICKER_COLLECTION = ['🦖', '🦄', '🚀', '🌟', '🍭', '🍕', '�
 
 const App: React.FC = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [currentActivity, setCurrentActivity] = useState<ActivityType | null>(null);
+  const [currentActivity, setCurrentActivity] = useState<ActivityType | 'english' | 'phonics' | null>(null);
   const [newStickerModal, setNewStickerModal] = useState<string | null>(null);
 
   if (!user) {
@@ -77,6 +78,9 @@ const App: React.FC = () => {
 
   const renderActivity = () => {
     switch (currentActivity) {
+      case 'english':
+      case 'phonics':
+        return <Learning key={currentActivity} subject={currentActivity} user={user} onBack={() => setCurrentActivity(null)} />;
       case ActivityType.ALPHABET:
         return (
           <Alphabet 
@@ -185,6 +189,18 @@ const App: React.FC = () => {
               </div>
             </header>
 
+            <section aria-labelledby="learning-heading" className="mb-8">
+              <h3 id="learning-heading" className="text-2xl font-bold text-gray-700 mb-2">Learn something new</h3>
+              <p className="text-gray-600 mb-4">Learn with a grown-up. Practise together. Try it yourself.</p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <button onClick={() => setCurrentActivity('english')} className="text-left bg-white rounded-3xl p-6 border-4 border-blue-200 hover:border-blue-500 focus-visible:outline-blue-700">
+                  <span className="text-4xl" aria-hidden="true">📚</span><span className="block text-2xl font-bold text-blue-800 mt-3">English</span><span className="block text-gray-600 mt-1">Greetings, words and first sentences</span><span className="block font-bold text-blue-700 mt-4">4 guided lessons →</span>
+                </button>
+                <button onClick={() => setCurrentActivity('phonics')} className="text-left bg-white rounded-3xl p-6 border-4 border-purple-200 hover:border-purple-500 focus-visible:outline-purple-700">
+                  <span className="text-4xl" aria-hidden="true">🔤</span><span className="block text-2xl font-bold text-purple-800 mt-3">Phonics</span><span className="block text-gray-600 mt-1">Meet sounds and blend your first words</span><span className="block font-bold text-purple-700 mt-4">9 guided lessons →</span>
+                </button>
+              </div>
+            </section>
             <h3 className="text-2xl font-bold text-gray-700 mb-4 flex items-center gap-2">
                 <Trophy className="text-yellow-500" /> My Games
             </h3>

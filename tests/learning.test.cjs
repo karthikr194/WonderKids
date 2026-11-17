@@ -1,0 +1,102 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { buildSync } = require('esbuild');
+const { JSDOM } = require('jsdom');
+const React = require('react');
+const { createRoot } = require('react-dom/client');
+const { act } = React;
+const path = require('node:path');
+
+const bundle = buildSync({ entryPoints: ['components/activities/Learning.tsx'], bundle: true, platform: 'node', format: 'cjs', packages: 'external', write: false }).outputFiles[0].text;
+// Resolve imports relative to the project, without leaving compiled artifacts behind.
+const Module = require('node:module');
+const compiled = new Module(path.resolve('learning-test-bundle.cjs'), module);
+compiled.filename = path.resolve('learning-test-bundle.cjs');
+compiled.paths = module.paths;
+compiled._compile(bundle, compiled.filename);
+const { Learning } = compiled.exports;
+
+test('guided lessons teach before testing, retry, save progress, and work without audio/storage', async () => {
+  const dom = new JSDOM('<div id="root"></div>', { url: 'http://localhost' });
+  global.window = dom.window;
+  global.document = dom.window.document;
+  global.localStorage = dom.window.localStorage;
+  global.IS_REACT_ACT_ENVIRONMENT = true;
+  const root = createRoot(document.getElementById('root'));
+  const user = { name: 'Test', age: 5, avatar: '🦁', stickers: [], stats: {} };
+  let home = false;
+  const render = async (subject = 'phonics') => act(() => root.render(React.createElement(Learning, { key: subject, subject, user, onBack: () => { home = true; } })));
+  const click = async (label) => {
+    const element = [...document.querySelectorAll('button')].find(button => button.textContent.trim() === label || button.getAttribute('aria-label') === label);
+    assert.ok(element, `Missing button: ${label}`);
+    await act(() => element.click());
+  };
+  const lesson = async (title) => {
+    const element = [...document.querySelectorAll('button')].find(button => button.textContent.includes(title));
+    assert.ok(element, `Missing lesson: ${title}`);
+    await act(() => element.click());
+  };
+  await render();
+  await lesson('Meet s');
+  assert.match(document.body.textContent, /Let me teach you/);
+  assert.doesNotMatch(document.body.textContent, /Which word starts/);
+  await click('Read instructions');
+  assert.match(document.body.textContent, /Audio is unavailable/);
+  await click('Practise together');
+  assert.match(document.body.textContent, /Let’s do it together/);
+  await click('I’m ready to try');
+  await click('pin');
+  assert.match(document.body.textContent, /Let’s try together/);
+  assert.doesNotMatch(document.body.textContent, /Next lesson/);
+  await click('sun');
+  assert.match(document.body.textContent, /1 \/ 9 lessons complete/);
+  assert.equal([...document.querySelectorAll('button')].find(button => button.textContent === 'sun').disabled, true);
+  await click('Next lesson');
+  assert.match(document.querySelector('h1').textContent, /Meet a/);
+  await click('All lessons');
+  await lesson('Blend sat');
+  await click('Practise together');
+  await click('Sound 1: s');
+  assert.equal(document.querySelector('[aria-label="Sound 1: s"]').getAttribute('aria-pressed'), 'true');
+  await click('All lessons');
+  await click('Home');
+  assert.equal(home, true);
+  await render('english');
+  await lesson('Hello, friend!');
+  await click('Practise together');
+  await click('I’m ready to try');
+  await click('Hello!');
+  assert.match(document.body.textContent, /1 \/ 4 lessons complete/);
+  await render('phonics');
+  assert.match(document.body.textContent, /1 \/ 9 lessons complete/);
+  // Repeating a completed lesson must not increment completion.
+  await lesson('Meet s');
+  await click('Practise together');
+  await click('I’m ready to try');
+  await click('sun');
+  assert.match(document.body.textContent, /1 \/ 9 lessons complete/);
+  // Speech is cancelled when navigating and unmounting.
+  let cancellations = 0;
+  let spoken = '';
+  window.speechSynthesis = { cancel() { cancellations++; }, speak(utterance) { spoken = utterance.text; } };
+  global.SpeechSynthesisUtterance = function(text) { this.text = text; };
+  window.SpeechSynthesisUtterance = global.SpeechSynthesisUtterance;
+  await click('Next lesson');
+  await click('Hear the word');
+  assert.equal(spoken, 'ant');
+  await click('All lessons');
+  assert.ok(cancellations > 0);
+  // Invalid stored data is ignored and blocked writes keep in-session progress.
+  localStorage.setItem('wonderkidz-learning-v1:test:5:english', '{invalid');
+  await render('english');
+  assert.match(document.body.textContent, /0 \/ 4 lessons complete/);
+  dom.window.Storage.prototype.setItem = () => { throw new Error('blocked'); };
+  await lesson('Hello, friend!');
+  await click('Practise together');
+  await click('I’m ready to try');
+  await click('Hello!');
+  assert.match(document.body.textContent, /1 \/ 4 lessons complete/);
+  assert.match(document.body.textContent, /this browser could not save it/);
+  await act(() => root.unmount());
+  dom.window.close();
+});
