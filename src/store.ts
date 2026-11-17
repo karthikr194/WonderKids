@@ -9,6 +9,16 @@ export const STICKERS = [
 ];
 export const XP_PER_STICKER = 10;
 export const XP_PER_LEVEL = 25;
+export const DAILY_GOAL = 10;
+
+const todayKey = () => new Date().toISOString().slice(0, 10);
+export const starsToday = (p: Profile) => (p.today?.date === todayKey() ? p.today.stars : 0);
+
+/** Progress (0–1) toward the next difficulty level of a section; 1 once at the top level. */
+export function levelProgress(p: Profile, id: SectionId): number {
+  if (levelFor(p, id) === 3) return 1;
+  return (p.stats[id].xp % XP_PER_LEVEL) / XP_PER_LEVEL;
+}
 
 const emptyStats = (): SectionStats => ({ xp: 0, streak: 0, correct: 0, attempts: 0 });
 
@@ -62,7 +72,8 @@ export function applyResult(p: Profile, id: SectionId, correct: boolean): Profil
     const fresh = STICKERS.find(st => !stickers.includes(st));
     if (fresh) stickers.push(fresh);
   }
-  return { ...p, stickers, stats: { ...p.stats, [id]: next } };
+  const today = { date: todayKey(), stars: starsToday(p) + (correct ? 1 : 0) };
+  return { ...p, stickers, today, stats: { ...p.stats, [id]: next } };
 }
 
 export function useProfile() {

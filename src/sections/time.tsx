@@ -115,14 +115,14 @@ function makeDayPart(): QuizQuestion {
 export const timeModes: ModeDef[] = [
   {
     id: 'clock', title: 'Read the Clock', emoji: '🕒', desc: "O'clock, half past and more",
-    render: p => <Quiz makeQuestion={makeClock} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeClock} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'calendar', title: 'Days & Months', emoji: '📅', desc: 'Days, months and seasons',
-    render: p => <Quiz makeQuestion={makeCalendar} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeCalendar} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'day-parts', title: 'Day & Night', emoji: '🌅', desc: 'Morning, afternoon or night?',
-    render: p => <Quiz makeQuestion={makeDayPart} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeDayPart} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
 ];

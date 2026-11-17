@@ -29,7 +29,7 @@ export function EmojiGroup({ emoji, count, crossed = 0, size = 'text-4xl' }: {
 }
 
 export const Swatch = ({ hex, size = 'h-20 w-20' }: { hex: string; size?: string }) => (
-  <span className={`inline-block rounded-full border-4 border-slate-200 shadow-inner ${size}`} style={{ backgroundColor: hex }} aria-hidden />
+  <span className={`inline-block rounded-full border-[3px] border-ink shadow-[inset_0_-6px_0_rgb(0_0_0/0.12)] ${size}`} style={{ backgroundColor: hex }} aria-hidden />
 );
 
 export function ShapeSvg({ shape, size = 120 }: { shape: ShapeItem; size?: number }) {
@@ -45,7 +45,7 @@ export function ClockFace({ hour, minute, size = 220 }: { hour: number; minute: 
   const minuteAngle = minute * 6;
   return (
     <svg viewBox="0 0 200 200" width={size} height={size} role="img" aria-label={`Clock showing ${hour}:${String(minute).padStart(2, '0')}`}>
-      <circle cx="100" cy="100" r="94" fill="#fff" stroke="#3B82F6" strokeWidth="8" />
+      <circle cx="100" cy="100" r="94" fill="#FFFDF8" stroke="#23264A" strokeWidth="7" />
       {Array.from({ length: 60 }, (_, i) => {
         const a = (i * 6 * Math.PI) / 180;
         const long = i % 5 === 0;
@@ -67,7 +67,7 @@ export function ClockFace({ hour, minute, size = 220 }: { hour: number; minute: 
 
 /** Quantity picture: dots in fives for up to 20, base-ten rods and units above that. */
 export function NumberVisual({ n }: { n: number }) {
-  if (n === 0) return <p className="text-lg font-bold text-slate-400">Nothing here – zero!</p>;
+  if (n === 0) return <p className="text-lg font-bold text-ink-soft">Nothing here – zero!</p>;
   if (n <= 20) {
     return (
       <div className="flex flex-col items-center gap-1" role="img" aria-label={`${n} dots`}>
@@ -77,7 +77,7 @@ export function NumberVisual({ n }: { n: number }) {
               <div key={half} className="flex gap-1">
                 {Array.from({ length: 5 }, (_, i) => {
                   const idx = start + half + i;
-                  return <span key={i} className={`h-6 w-6 rounded-full sm:h-7 sm:w-7 ${idx < n ? (start === 0 ? 'bg-rose-400' : 'bg-sky-400') : 'bg-slate-100'}`} />;
+                  return <span key={i} className={`h-6 w-6 rounded-full sm:h-7 sm:w-7 ${idx < n ? (start === 0 ? 'bg-rose-400' : 'bg-sky-400') : 'bg-cream'}`} />;
                 })}
               </div>
             ))}

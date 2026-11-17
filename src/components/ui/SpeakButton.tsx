@@ -7,10 +7,10 @@ export function SpeakButton({ onClick, label = 'Listen', className = '' }: {
     <button
       type="button"
       onClick={onClick}
-      aria-label={label}
-      className={`inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-lg font-bold text-slate-600 shadow-md border-b-4 border-slate-200 active:translate-y-0.5 active:border-b-2 ${className}`}
+      className={`chunky-sm inline-flex items-center gap-2 rounded-full bg-paper px-5 py-2.5 text-lg font-bold text-ink ${className}`}
     >
-      <Volume2 size={22} /> {label}
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-white"><Volume2 size={16} /></span>
+      {label}
     </button>
   );
 }

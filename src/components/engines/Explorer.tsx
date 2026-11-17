@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { sfx } from '../../lib/sfx';
-import type { Theme } from '../../types';
+import { MascotSays } from '../ui/Mascot';
 
 interface Props<T> {
   items: T[];
@@ -11,17 +11,19 @@ interface Props<T> {
   renderCard: (t: T) => ReactNode;
   /** Called whenever an item is opened – play its sound / award a star here. */
   onOpen?: (t: T) => void;
-  theme: Theme;
   /** Tailwind grid columns for the tile grid. */
   gridClass?: string;
+  /** What the mascot says before anything is opened. */
+  hint?: string;
 }
 
 /** A tile grid; tapping a tile opens a big card with previous / next arrows. */
 export function Explorer<T>({
-  items, itemKey, renderTile, renderCard, onOpen, theme,
-  gridClass = 'grid-cols-4 sm:grid-cols-6',
+  items, itemKey, renderTile, renderCard, onOpen,
+  gridClass = 'grid-cols-4 sm:grid-cols-6', hint = 'Tap a card to explore!',
 }: Props<T>) {
   const [index, setIndex] = useState<number | null>(null);
+  const [seen, setSeen] = useState<Set<string>>(() => new Set());
   const top = useRef<HTMLDivElement>(null);
 
   // A different item list (e.g. new filter) closes the card.
@@ -32,53 +34,69 @@ export function Explorer<T>({
     const n = (i + items.length) % items.length;
     sfx.tap();
     setIndex(n);
+    setSeen(s => new Set(s).add(itemKey(items[n])));
     onOpen?.(items[n]);
     top.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const current = index === null ? null : items[index];
+  const seenHere = items.filter(it => seen.has(itemKey(it))).length;
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
-      <div ref={top} className="scroll-mt-20" />
+    <div className="mx-auto w-full max-w-3xl pb-8">
+      <div ref={top} className="scroll-mt-24" />
       <AnimatePresence mode="wait">
-        {current && (
+        {index !== null ? (
           <motion.div
-            key={itemKey(current)}
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.92 }}
-            className={`relative mb-6 rounded-[2rem] border-4 bg-white p-5 text-center shadow-xl sm:p-8 ${theme.border}`}
+            key={itemKey(items[index])}
+            initial={{ opacity: 0, y: 16, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -16, scale: 0.97 }}
+            transition={{ duration: 0.18 }}
+            className="chunky relative mb-6 overflow-hidden rounded-[2rem] bg-paper text-center"
           >
-            <button
-              type="button" aria-label="Previous"
-              onClick={() => open(index! - 1)}
-              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-slate-100 p-3 text-slate-500 active:scale-90 sm:left-4"
-            ><ChevronLeft size={28} /></button>
-            <button
-              type="button" aria-label="Next"
-              onClick={() => open(index! + 1)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-slate-100 p-3 text-slate-500 active:scale-90 sm:right-4"
-            ><ChevronRight size={28} /></button>
-            <div className="mx-10 sm:mx-14">{renderCard(current)}</div>
+            <div className="h-3 bg-accent" />
+            <button type="button" aria-label="Close" onClick={() => setIndex(null)}
+              className="absolute right-3 top-6 rounded-full p-1.5 text-ink-soft hover:bg-ink/5"><X size={22} /></button>
+            <div className="px-5 pb-5 pt-5 sm:px-10 sm:pb-8">{renderCard(items[index])}</div>
+            <div className="flex items-center justify-between border-t-[3px] border-ink bg-accent-soft px-3 py-2.5">
+              <button type="button" aria-label="Previous" onClick={() => open(index - 1)}
+                className="chunky-sm flex h-11 w-11 items-center justify-center rounded-full bg-paper"><ChevronLeft size={24} /></button>
+              <span className="font-bold text-ink-soft">{index + 1} of {items.length}</span>
+              <button type="button" aria-label="Next" onClick={() => open(index + 1)}
+                className="chunky-sm flex h-11 w-11 items-center justify-center rounded-full bg-paper"><ChevronRight size={24} /></button>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6">
+            <MascotSays>{hint}</MascotSays>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className={`grid gap-2 sm:gap-3 ${gridClass}`}>
-        {items.map((it, i) => (
-          <motion.button
-            key={itemKey(it)}
-            data-explore-tile
-            type="button"
-            whileTap={{ scale: 0.9 }}
-            onClick={() => open(i)}
-            className={`flex aspect-square items-center justify-center rounded-2xl border-b-4 text-2xl font-black shadow-sm sm:text-3xl
-              ${i === index ? `${theme.solid} border-black/20 text-white` : `bg-white ${theme.text} border-slate-200`}`}
-          >
-            {renderTile(it)}
-          </motion.button>
-        ))}
+      <div className="mb-3 flex items-center justify-between px-1 text-sm font-bold text-ink-soft">
+        <span>Explored {seenHere} of {items.length}</span>
+        <span className="h-2.5 w-32 overflow-hidden rounded-full bg-ink/10">
+          <span className="block h-full rounded-full bg-accent transition-all" style={{ width: `${(seenHere / items.length) * 100}%` }} />
+        </span>
+      </div>
+      <div className={`grid gap-2.5 sm:gap-3 ${gridClass}`}>
+        {items.map((it, i) => {
+          const active = i === index;
+          const visited = seen.has(itemKey(it));
+          return (
+            <button
+              key={itemKey(it)}
+              data-explore-tile
+              type="button"
+              onClick={() => open(i)}
+              className={`chunky-sm relative flex aspect-square items-center justify-center rounded-2xl text-2xl font-black sm:text-3xl
+                ${active ? 'bg-accent text-white' : visited ? 'bg-accent-soft text-accent-deep' : 'bg-paper text-ink'}`}
+            >
+              {renderTile(it)}
+              {visited && !active && <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-accent" />}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

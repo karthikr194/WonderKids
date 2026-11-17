@@ -8,6 +8,7 @@ import { useProfile } from './store';
 import { setSoundEnabled, stopSpeaking } from './lib/speech';
 import { sfx } from './lib/sfx';
 import { fireworks } from './lib/confetti';
+import { Button } from './components/ui/Button';
 import type { ModeDef, SectionDef } from './types';
 
 const SOUND_KEY = 'wonderkids:sound';
@@ -79,28 +80,23 @@ export default function App() {
         {sticker && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4 backdrop-blur-sm"
             onClick={() => setSticker(null)}
             role="dialog" aria-label="New sticker"
           >
             <motion.div
               initial={{ scale: 0.5, y: 80 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.5, y: 80 }}
               onClick={e => e.stopPropagation()}
-              className="relative w-full max-w-md overflow-hidden rounded-[2.5rem] bg-white p-8 text-center sm:p-12"
+              className="chunky relative w-full max-w-sm overflow-hidden rounded-[2.5rem] bg-paper p-8 text-center"
             >
-              <div className="absolute inset-x-0 top-0 h-4 bg-gradient-to-r from-red-400 via-yellow-400 to-blue-400" />
-              <h2 className="mb-1 text-3xl font-black text-slate-800">New sticker!</h2>
-              <p className="mb-6 text-slate-500">You are doing great!</p>
+              <p className="mx-auto mb-2 w-fit rounded-full border-2 border-ink bg-sun px-3 py-0.5 text-sm font-black uppercase tracking-wider">New sticker!</p>
+              <h2 className="mb-5 text-3xl font-black">You earned it! 🎉</h2>
               <motion.div
-                animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.2, 1] }}
-                transition={{ duration: 1, repeat: Infinity, repeatDelay: 1 }}
-                className="mb-6 text-[110px] leading-none"
+                animate={{ rotate: [0, 8, -8, 0], scale: [1, 1.12, 1] }}
+                transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 0.8 }}
+                className="chunky mx-auto mb-6 flex h-40 w-40 items-center justify-center rounded-[2.5rem] bg-sun/40 text-[96px] leading-none"
               >{sticker}</motion.div>
-              <button
-                type="button"
-                onClick={() => setSticker(null)}
-                className="w-full rounded-2xl border-b-4 border-blue-700 bg-blue-500 py-4 text-xl font-bold text-white shadow-lg active:translate-y-1 active:border-b-0"
-              >Awesome!</button>
+              <Button size="lg" variant="good" onClick={() => setSticker(null)}>Awesome!</Button>
             </motion.div>
           </motion.div>
         )}

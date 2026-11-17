@@ -1,32 +1,40 @@
-import { motion, type HTMLMotionProps } from 'framer-motion';
+import type { ButtonHTMLAttributes } from 'react';
 
-interface ButtonProps extends HTMLMotionProps<'button'> {
-  variant?: 'primary' | 'success' | 'ghost' | 'warn';
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'accent' | 'good' | 'sun' | 'paper';
   size?: 'sm' | 'md' | 'lg';
 }
 
 const VARIANTS = {
-  primary: 'bg-blue-500 text-white border-blue-700',
-  success: 'bg-green-500 text-white border-green-700',
-  warn: 'bg-orange-500 text-white border-orange-700',
-  ghost: 'bg-white text-slate-600 border-slate-300',
+  accent: 'bg-accent text-white',
+  good: 'bg-good text-white',
+  sun: 'bg-sun text-ink',
+  paper: 'bg-paper text-ink',
 };
 const SIZES = {
-  sm: 'px-4 py-2 text-base',
-  md: 'px-6 py-3 text-xl',
-  lg: 'px-8 py-4 text-2xl w-full',
+  sm: 'px-4 py-2 text-base rounded-2xl',
+  md: 'px-6 py-3 text-xl rounded-2xl',
+  lg: 'w-full px-6 py-4 text-2xl rounded-3xl',
 };
 
-export function Button({ variant = 'primary', size = 'md', className = '', children, ...rest }: ButtonProps) {
+export function Button({ variant = 'accent', size = 'md', className = '', type = 'button', ...rest }: ButtonProps) {
   return (
-    <motion.button
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.96, y: 3 }}
-      className={`rounded-2xl border-b-[5px] font-bold shadow-md transition-colors disabled:opacity-40 disabled:pointer-events-none
-        ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+    <button
+      type={type}
+      className={`chunky font-bold tracking-wide disabled:opacity-40 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       {...rest}
-    >
-      {children}
-    </motion.button>
+    />
+  );
+}
+
+export function IconButton({ label, className = '', ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      className={`chunky-sm flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-paper text-ink ${className}`}
+      {...rest}
+    />
   );
 }

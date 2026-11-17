@@ -26,26 +26,26 @@ function makeIdentify(level: Level): QuizQuestion {
   };
 }
 
-function AnimalExplorer({ theme, onResult }: Pick<ModeProps, 'theme' | 'onResult'>) {
+function AnimalExplorer({ onResult }: Pick<ModeProps, 'onResult'>) {
   return (
     <Explorer
       items={ANIMALS}
       itemKey={a => a.name}
-      theme={theme}
+     
       gridClass="grid-cols-4 sm:grid-cols-6"
       renderTile={a => <span className="text-4xl sm:text-5xl">{a.emoji}</span>}
       onOpen={a => { onResult(true); void speakSequence([a.name, { text: `${a.name} says ${a.sound}!`, rate: 0.9 }]); }}
       renderCard={a => (
         <div>
           <div className="text-8xl" aria-hidden>{a.emoji}</div>
-          <div className={`mb-1 text-4xl font-black ${theme.text}`}>{a.name}</div>
-          <div className="mb-3 text-3xl font-black text-slate-700">“{a.sound}!”</div>
-          <div className="mb-3 grid grid-cols-3 gap-2 text-sm font-bold text-slate-600 sm:text-base">
+          <div className={`mb-1 text-4xl font-black text-accent-deep`}>{a.name}</div>
+          <div className="mb-3 text-3xl font-black text-ink">“{a.sound}!”</div>
+          <div className="mb-3 grid grid-cols-3 gap-2 text-sm font-bold text-ink sm:text-base">
             <span className="rounded-xl bg-sky-50 p-2">🏠 Lives in<br /><b>{a.home}</b></span>
             <span className="rounded-xl bg-pink-50 p-2">🍼 Baby<br /><b>{a.baby}</b></span>
             <span className="rounded-xl bg-green-50 p-2">🍽️ Eats<br /><b>{a.food}</b></span>
           </div>
-          <p className="mb-3 text-lg font-semibold text-slate-500">{a.fact}</p>
+          <p className="mb-3 text-lg font-semibold text-ink-soft">{a.fact}</p>
           <SpeakButton label="Listen" onClick={() => void speakSequence([`${a.name} says ${a.sound}.`, a.fact])} />
         </div>
       )}
@@ -106,18 +106,18 @@ function makeOpposite(level: Level): QuizQuestion {
 export const worldModes: ModeDef[] = [
   {
     id: 'animals', title: 'Animal Friends', emoji: '🦁', desc: 'Sounds, homes, babies and facts',
-    render: p => <AnimalExplorer theme={p.theme} onResult={p.onResult} />,
+    render: p => <AnimalExplorer onResult={p.onResult} />,
   },
   {
     id: 'animal-quiz', title: 'Animal Quiz', emoji: '🐮', desc: 'Who says moo? Where do they live?',
-    render: p => <Quiz makeQuestion={makeAnimalQuiz} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeAnimalQuiz} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'identify', title: 'What Is It?', emoji: '🔍', desc: `Name ${CATEGORIES.length} groups of things`,
-    render: p => <Quiz makeQuestion={makeIdentify} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeIdentify} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'opposites', title: 'Opposites', emoji: '↔️', desc: 'Hot and cold, up and down',
-    render: p => <Quiz makeQuestion={makeOpposite} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeOpposite} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
 ];

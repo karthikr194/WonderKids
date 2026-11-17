@@ -6,8 +6,8 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#FEF9C3",
-  "theme_color": "#F59E0B",
+  "background_color": "#FFF6E5",
+  "theme_color": "#FFF6E5",
   "categories": ["education", "kids"],
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

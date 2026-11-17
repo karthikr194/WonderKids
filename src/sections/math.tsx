@@ -38,7 +38,7 @@ function makeAdd(level: Level): QuizQuestion {
     visual: showObjects ? (
       <div className="flex flex-wrap items-center justify-center gap-4">
         <EmojiGroup emoji={emoji} count={a} />
-        <span className="text-4xl font-black text-slate-400">+</span>
+        <span className="text-4xl font-black text-ink-soft">+</span>
         <EmojiGroup emoji={emoji} count={b} />
       </div>
     ) : undefined,
@@ -110,18 +110,18 @@ function makeCompare(level: Level): QuizQuestion {
 export const mathModes: ModeDef[] = [
   {
     id: 'count', title: 'Count It', emoji: '🧮', desc: 'How many are there?',
-    render: p => <Quiz makeQuestion={makeCount} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeCount} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'add', title: 'Add It Up', emoji: '➕', desc: 'Put groups together',
-    render: p => <Quiz makeQuestion={makeAdd} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeAdd} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'subtract', title: 'Take Away', emoji: '➖', desc: 'How many are left?',
-    render: p => <Quiz makeQuestion={makeSubtract} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeSubtract} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'compare', title: 'More or Less', emoji: '⚖️', desc: 'Compare groups and numbers',
-    render: p => <Quiz makeQuestion={makeCompare} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeCompare} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
 ];

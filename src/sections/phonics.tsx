@@ -13,28 +13,28 @@ import type { Level, ModeDef, ModeProps } from '../types';
 
 // ---------- explorers ----------
 
-function SoundExplorer({ items, isLetters, theme, onResult }: Pick<ModeProps, 'theme' | 'onResult'> & {
+function SoundExplorer({ items, isLetters, onResult }: Pick<ModeProps, 'onResult'> & {
   items: Phoneme[]; isLetters: boolean;
 }) {
   return (
     <Explorer
       items={items}
       itemKey={p => p.id}
-      theme={theme}
+     
       gridClass={isLetters ? 'grid-cols-5 sm:grid-cols-7' : 'grid-cols-4 sm:grid-cols-6'}
       renderTile={p => p.display}
       onOpen={p => { onResult(true); void playPhoneme(p.id, p.say); }}
       renderCard={p => (
         <div>
-          <div className={`text-8xl font-black sm:text-9xl ${theme.text}`}>{p.display}</div>
-          <div className="mb-3 text-xl font-bold text-slate-400">sound {p.ipa}</div>
+          <div className={`text-8xl font-black sm:text-9xl text-accent-deep`}>{p.display}</div>
+          <div className="mb-3 text-xl font-bold text-ink-soft">sound {p.ipa}</div>
           <div className="mb-4 flex flex-wrap justify-center gap-2">
             <SpeakButton label="Hear the sound" onClick={() => void playPhoneme(p.id, p.say)} />
             {isLetters && (
               <button
                 type="button"
                 onClick={() => void speakLetterName(p.grapheme)}
-                className="rounded-full bg-white px-5 py-3 text-lg font-bold text-slate-500 shadow-md border-b-4 border-slate-200 active:translate-y-0.5"
+                className="rounded-full bg-paper px-5 py-3 text-lg font-bold text-ink-soft chunky-sm"
               >
                 Letter name
               </button>
@@ -47,14 +47,14 @@ function SoundExplorer({ items, isLetters, theme, onResult }: Pick<ModeProps, 't
                 key={w.word}
                 type="button"
                 onClick={() => void speakSequence([{ text: p.say, rate: 0.55, pitch: 1, pause: 250 }, { text: w.word, rate: 0.8 }])}
-                className="flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-2 text-2xl font-black text-slate-700 shadow-sm active:scale-95"
+                className="flex items-center gap-2 rounded-2xl bg-cream px-4 py-2 text-2xl font-black text-ink chunky-sm"
               >
                 <span className="text-4xl" aria-hidden>{w.emoji}</span>
                 <span>
                   {w.word.startsWith(p.grapheme)
-                    ? <><span className={theme.text}>{p.grapheme}</span>{w.word.slice(p.grapheme.length)}</>
+                    ? <><span className="text-accent-deep">{p.grapheme}</span>{w.word.slice(p.grapheme.length)}</>
                     : <>{w.word.split(p.grapheme).map((part, i, arr) => (
-                        <span key={i}>{part}{i < arr.length - 1 && <span className={theme.text}>{p.grapheme}</span>}</span>
+                        <span key={i}>{part}{i < arr.length - 1 && <span className="text-accent-deep">{p.grapheme}</span>}</span>
                       ))}</>}
                 </span>
               </button>
@@ -138,7 +138,7 @@ function makeSoundMatch(level: Level): QuizQuestion {
     key: `pic-${right.word}`,
     prompt: 'Which picture starts with this sound?',
     audio: () => playPhoneme(target.id, target.say),
-    visual: <span className="text-6xl font-black text-slate-500">{target.display}</span>,
+    visual: <span className="text-6xl font-black text-ink-soft">{target.display}</span>,
     options: shuffle([right, ...others]).map(w => ({ id: w.word, visual: <OptionEmoji>{w.emoji}</OptionEmoji>, speak: w.word })),
     correctId: right.word,
     optionStyle: 'big',
@@ -172,7 +172,7 @@ function makeTeamQuiz(level: Level): QuizQuestion {
     visual: (
       <div className="flex flex-col items-center gap-1">
         <BigEmoji>{w.emoji}</BigEmoji>
-        <span className="text-4xl font-black text-slate-600">{w.word}</span>
+        <span className="text-4xl font-black text-ink">{w.word}</span>
       </div>
     ),
     options: soundOptions(target, DIGRAPHS, 3).map(p => ({ id: p.id, visual: <OptionText>{p.display}</OptionText>, speak: p.say })),
@@ -201,30 +201,30 @@ function makeBuildItem(level: Level): BuildItem {
 export const phonicsModes: ModeDef[] = [
   {
     id: 'letter-sounds', title: 'Letter Sounds', emoji: '🔤', desc: 'Hear the real sound each letter makes',
-    render: p => <SoundExplorer items={LETTER_SOUNDS} isLetters theme={p.theme} onResult={p.onResult} />,
+    render: p => <SoundExplorer items={LETTER_SOUNDS} isLetters onResult={p.onResult} />,
   },
   {
     id: 'sound-match', title: 'Sound Match', emoji: '👂', desc: 'Listen and find the letter',
-    render: p => <Quiz makeQuestion={makeSoundMatch} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeSoundMatch} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'blend', title: 'Blend It!', emoji: '🧩', desc: 'Sound out c-a-t and blend it',
-    render: p => <BlendIt words={CVC_WORDS} theme={p.theme} onResult={p.onResult} />,
+    render: p => <BlendIt words={CVC_WORDS} onResult={p.onResult} />,
   },
   {
     id: 'build', title: 'Build Words', emoji: '🔡', desc: 'Spell words from their sounds',
-    render: p => <WordBuilder makeItem={makeBuildItem} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <WordBuilder makeItem={makeBuildItem} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'teams', title: 'Letter Teams', emoji: '🤝', desc: 'sh, ch, th, ee, oo, ai and more',
-    render: p => <SoundExplorer items={DIGRAPHS} isLetters={false} theme={p.theme} onResult={p.onResult} />,
+    render: p => <SoundExplorer items={DIGRAPHS} isLetters={false} onResult={p.onResult} />,
   },
   {
     id: 'team-words', title: 'Team Words', emoji: '🐑', desc: 'Blend words like ship, rain, moon',
-    render: p => <BlendIt words={TEAM_WORDS} theme={p.theme} onResult={p.onResult} />,
+    render: p => <BlendIt words={TEAM_WORDS} onResult={p.onResult} />,
   },
   {
     id: 'team-quiz', title: 'Team Quiz', emoji: '🎯', desc: 'Which letters make the sound?',
-    render: p => <Quiz makeQuestion={makeTeamQuiz} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeTeamQuiz} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
 ];

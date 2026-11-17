@@ -6,11 +6,10 @@ import { sfx } from '../../lib/sfx';
 import { burst } from '../../lib/confetti';
 import { PHONEME_BY_GRAPHEME, sayUnit, type BlendWord } from '../../data/phonics';
 import { Button } from '../ui/Button';
-import type { Theme } from '../../types';
+import { MascotSays } from '../ui/Mascot';
 
 interface Props {
   words: BlendWord[];
-  theme: Theme;
   onResult: (correct: boolean) => void;
 }
 
@@ -18,10 +17,11 @@ interface Props {
  * Sounding out: tap each letter (or letter team) to hear its sound,
  * "Sound it out" says the sounds one by one, "Say it fast" blends them into the word.
  */
-export function BlendIt({ words, theme, onResult }: Props) {
+export function BlendIt({ words, onResult }: Props) {
   const [i, setI] = useState(0);
   const [active, setActive] = useState(-1);
   const [blended, setBlended] = useState(false);
+  const [done, setDone] = useState<Set<number>>(() => new Set());
   const word = words[i];
 
   useEffect(() => () => stopSpeaking(), []);
@@ -34,11 +34,9 @@ export function BlendIt({ words, theme, onResult }: Props) {
   };
 
   const soundOut = async () => {
-    await speakSequence(
-      word.units.map((u, idx) => ({
-        text: sayUnit(u), rate: 0.55, pitch: 1, pause: 350, onStart: () => setActive(idx),
-      })),
-    );
+    await speakSequence(word.units.map((u, idx) => ({
+      text: sayUnit(u), rate: 0.55, pitch: 1, pause: 350, onStart: () => setActive(idx),
+    })));
     setActive(-1);
   };
 
@@ -49,6 +47,7 @@ export function BlendIt({ words, theme, onResult }: Props) {
     ]);
     if (!blended) {
       setBlended(true);
+      setDone(d => new Set(d).add(i));
       onResult(true);
       burst();
       sfx.correct();
@@ -58,37 +57,51 @@ export function BlendIt({ words, theme, onResult }: Props) {
   const go = (d: number) => setI(n => (n + d + words.length) % words.length);
 
   return (
-    <div className="mx-auto w-full max-w-2xl rounded-[2rem] bg-white p-5 text-center shadow-xl sm:p-8">
-      <p className="mb-2 text-xl font-bold text-slate-500">Tap each sound, then blend them together!</p>
-      <div className="mb-4 text-9xl" aria-hidden>{word.emoji}</div>
+    <div className="mx-auto w-full max-w-2xl pb-8">
+      <div className="mb-5"><MascotSays>Tap each sound, then blend them together!</MascotSays></div>
 
-      <div className="mb-6 flex flex-wrap justify-center gap-3">
-        {word.units.map((u, idx) => (
-          <motion.button
-            key={`${i}-${idx}`}
-            type="button"
-            whileTap={{ scale: 0.9 }}
-            animate={{ y: active === idx ? -14 : 0, scale: active === idx ? 1.15 : 1 }}
-            onClick={() => tapUnit(u, idx)}
-            aria-label={`Sound ${PHONEME_BY_GRAPHEME[u]?.ipa ?? u}`}
-            className={`h-24 min-w-20 rounded-3xl border-b-[6px] px-4 text-6xl font-black shadow-md sm:h-28 sm:min-w-24 sm:text-7xl
-              ${active === idx ? 'border-yellow-600 bg-yellow-300 text-yellow-900' : `${theme.solid} border-black/20 text-white`}`}
-          >
-            {u}
-          </motion.button>
-        ))}
-      </div>
+      <div className="chunky overflow-hidden rounded-[2rem] bg-paper text-center">
+        <div className="bg-accent-soft py-6 text-9xl leading-none" aria-hidden>{word.emoji}</div>
+        <div className="border-t-[3px] border-ink p-5 sm:p-7">
+          <div className="mb-6 flex flex-wrap items-end justify-center gap-3">
+            {word.units.map((u, idx) => (
+              <motion.button
+                key={`${i}-${idx}`}
+                type="button"
+                animate={{ y: active === idx ? -12 : 0 }}
+                onClick={() => tapUnit(u, idx)}
+                aria-label={`Sound ${PHONEME_BY_GRAPHEME[u]?.ipa ?? u}`}
+                className={`chunky h-24 min-w-20 rounded-3xl px-4 text-6xl font-black sm:h-28 sm:min-w-24 sm:text-7xl
+                  ${active === idx ? 'bg-sun text-ink' : 'bg-accent text-white'}`}
+              >
+                {u}
+              </motion.button>
+            ))}
+          </div>
+          {/* the "sound line" under the tiles, like in a phonics classroom */}
+          <div className="mx-auto mb-6 flex max-w-xs items-center gap-1" aria-hidden>
+            {word.units.map((_, idx) => (
+              <span key={idx} className={`h-2 flex-1 rounded-full transition-colors ${active === idx ? 'bg-sun' : 'bg-ink/15'}`} />
+            ))}
+            <span className="ml-1 text-lg">➜</span>
+          </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3">
-        <Button variant="warn" onClick={() => void soundOut()}>🐢 Sound it out</Button>
-        <Button variant="success" onClick={() => void blend()}>🐇 Say it fast</Button>
+          <div className="grid grid-cols-2 gap-3">
+            <Button variant="sun" onClick={() => void soundOut()}>🐢 Sound it out</Button>
+            <Button variant="good" onClick={() => void blend()}>🐇 Say it fast</Button>
+          </div>
+        </div>
+        <div className="flex items-center justify-between border-t-[3px] border-ink bg-accent-soft px-3 py-2.5">
+          <button type="button" aria-label="Previous word" onClick={() => go(-1)}
+            className="chunky-sm flex h-11 w-11 items-center justify-center rounded-full bg-paper"><ChevronLeft size={24} /></button>
+          <button type="button" onClick={() => void speak(word.word)} className="text-3xl font-black text-ink">
+            {blended || done.has(i) ? word.word : '? ? ?'}
+          </button>
+          <button type="button" aria-label="Next word" onClick={() => go(1)}
+            className="chunky-sm flex h-11 w-11 items-center justify-center rounded-full bg-paper"><ChevronRight size={24} /></button>
+        </div>
       </div>
-
-      <div className="flex items-center justify-between">
-        <button type="button" aria-label="Previous word" onClick={() => go(-1)} className="rounded-full bg-slate-100 p-3 text-slate-500 active:scale-90"><ChevronLeft size={28} /></button>
-        <button type="button" onClick={() => void speak(word.word)} className="text-3xl font-black text-slate-600">{word.word}</button>
-        <button type="button" aria-label="Next word" onClick={() => go(1)} className="rounded-full bg-slate-100 p-3 text-slate-500 active:scale-90"><ChevronRight size={28} /></button>
-      </div>
+      <p className="mt-3 text-center text-sm font-bold text-ink-soft">Blended {done.size} of {words.length} words</p>
     </div>
   );
 }

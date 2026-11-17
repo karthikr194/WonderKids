@@ -42,7 +42,7 @@ const RANGES: { id: string; label: string; numbers: number[] }[] = [
   { id: '51-100', label: '51 – 100', numbers: Array.from({ length: 50 }, (_, i) => i + 51) },
 ];
 
-function NumberExplorer({ theme, onResult }: Pick<ModeProps, 'theme' | 'onResult'>) {
+function NumberExplorer({ onResult }: Pick<ModeProps, 'onResult'>) {
   const [rangeId, setRangeId] = useState('0-10');
   const range = RANGES.find(r => r.id === rangeId)!;
   return (
@@ -53,24 +53,24 @@ function NumberExplorer({ theme, onResult }: Pick<ModeProps, 'theme' | 'onResult
             key={r.id}
             type="button"
             onClick={() => setRangeId(r.id)}
-            className={`rounded-full px-4 py-2 text-lg font-bold shadow-sm ${r.id === rangeId ? `${theme.solid} text-white` : 'bg-white text-slate-500'}`}
+            className={`chunky-sm rounded-full px-4 py-2 text-lg font-bold ${r.id === rangeId ? `bg-accent text-white` : 'bg-paper text-ink-soft'}`}
           >{r.label}</button>
         ))}
       </div>
       <Explorer
         items={range.numbers}
         itemKey={n => String(n)}
-        theme={theme}
+       
         gridClass="grid-cols-5 sm:grid-cols-8"
         renderTile={n => n}
         onOpen={n => { onResult(true); void speak(spokenNumber(n)); }}
         renderCard={n => (
           <div>
-            <div className={`text-8xl font-black ${theme.text}`}>{n}</div>
-            <div className="mb-3 text-4xl font-black text-slate-700 sm:text-5xl">{numberToWords(n)}</div>
+            <div className={`text-8xl font-black text-accent-deep`}>{n}</div>
+            <div className="mb-3 text-4xl font-black text-ink sm:text-5xl">{numberToWords(n)}</div>
             <div className="mb-4 flex min-h-16 justify-center"><NumberVisual n={n} /></div>
             {n > 20 && (
-              <p className="mb-3 text-base font-semibold text-slate-500">
+              <p className="mb-3 text-base font-semibold text-ink-soft">
                 {Math.floor(n / 10)} {Math.floor(n / 10) === 1 ? 'ten' : 'tens'}{n % 10 ? ` and ${n % 10} ${n % 10 === 1 ? 'one' : 'ones'}` : ''}
               </p>
             )}
@@ -95,7 +95,7 @@ function makeMatch(level: Level): QuizQuestion {
     return {
       key: `w-${n}`,
       prompt: 'Which word matches the number?',
-      visual: <span className="text-8xl font-black text-slate-700">{n}</span>,
+      visual: <span className="text-8xl font-black text-ink">{n}</span>,
       options: numberOptions(n, level, level === 1 ? 3 : 4).map(wordOption),
       correctId: String(n),
       optionStyle: 'chip',
@@ -107,7 +107,7 @@ function makeMatch(level: Level): QuizQuestion {
       key: `n-${n}`,
       prompt: 'Which number is this word?',
       audio: () => speak(spokenNumber(n)),
-      visual: <span className="text-6xl font-black text-slate-700 sm:text-7xl">{numberToWords(n)}</span>,
+      visual: <span className="text-6xl font-black text-ink sm:text-7xl">{numberToWords(n)}</span>,
       options: numberOptions(n, level, level === 1 ? 3 : 4).map(numeralOption),
       correctId: String(n),
       optionStyle: 'big',
@@ -161,7 +161,7 @@ function makeWordMath(level: Level): QuizQuestion {
     prompt: sentence.charAt(0).toUpperCase() + sentence.slice(1),
     audio: () => speak(sentence.replace('minus', 'take away')),
     visual: (
-      <div className="text-5xl font-black text-slate-700">
+      <div className="text-5xl font-black text-ink">
         {a} {op === 'plus' ? '+' : '−'} {b} = ?
       </div>
     ),
@@ -203,7 +203,7 @@ function makeOrder(level: Level): QuizQuestion {
     key: line,
     prompt: 'Which number word fits the blank?',
     audio: () => speak(line.replace('___', 'what comes here?').replace(/-/g, ' ')),
-    visual: <p className="text-3xl font-black text-slate-700 sm:text-4xl">{line.replace('___', '❓')}</p>,
+    visual: <p className="text-3xl font-black text-ink sm:text-4xl">{line.replace('___', '❓')}</p>,
     options: withDistractors(missing, pool, 4).map(wordOption),
     correctId: String(missing),
     optionStyle: 'chip',
@@ -214,23 +214,23 @@ function makeOrder(level: Level): QuizQuestion {
 export const numberWordModes: ModeDef[] = [
   {
     id: 'learn', title: 'Numbers & Words', emoji: '🔢', desc: 'See, hear and read numbers up to 100',
-    render: p => <NumberExplorer theme={p.theme} onResult={p.onResult} />,
+    render: p => <NumberExplorer onResult={p.onResult} />,
   },
   {
     id: 'match', title: 'Word Match', emoji: '🔗', desc: '7 = seven. Match numbers to words',
-    render: p => <Quiz makeQuestion={makeMatch} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeMatch} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'spell', title: 'Spell the Number', emoji: '✏️', desc: 'Build number words letter by letter',
-    render: p => <WordBuilder makeItem={makeSpell} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <WordBuilder makeItem={makeSpell} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'word-math', title: 'Word Math', emoji: '➕', desc: 'Two plus three equals…?',
-    render: p => <Quiz makeQuestion={makeWordMath} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeWordMath} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'order', title: 'What Comes Next?', emoji: '🪜', desc: 'Fill the gap in number words',
-    render: p => <Quiz makeQuestion={makeOrder} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeOrder} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
 ];
 

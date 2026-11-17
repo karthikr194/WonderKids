@@ -18,7 +18,7 @@ const SETS: { id: Level; label: string }[] = [
   { id: 1, label: 'Set 1' }, { id: 2, label: 'Set 2' }, { id: 3, label: 'Set 3' },
 ];
 
-function SightWordCards({ theme, onResult }: Pick<ModeProps, 'theme' | 'onResult'>) {
+function SightWordCards({ onResult }: Pick<ModeProps, 'onResult'>) {
   const [set, setSet] = useState<Level>(1);
   return (
     <div>
@@ -28,21 +28,21 @@ function SightWordCards({ theme, onResult }: Pick<ModeProps, 'theme' | 'onResult
             key={s.id}
             type="button"
             onClick={() => setSet(s.id)}
-            className={`rounded-full px-5 py-2 text-lg font-bold shadow-sm ${s.id === set ? `${theme.solid} text-white` : 'bg-white text-slate-500'}`}
+            className={`chunky-sm rounded-full px-5 py-2 text-lg font-bold ${s.id === set ? `bg-accent text-white` : 'bg-paper text-ink-soft'}`}
           >{s.label}</button>
         ))}
       </div>
       <Explorer
         items={SIGHT_WORDS[set]}
         itemKey={w => w}
-        theme={theme}
+       
         gridClass="grid-cols-3 sm:grid-cols-5"
         renderTile={w => <span className="text-xl sm:text-2xl">{w}</span>}
         onOpen={w => { onResult(true); void speak(w); }}
         renderCard={w => (
           <div>
-            <div className={`mb-2 text-7xl font-black sm:text-8xl ${theme.text}`}>{w}</div>
-            <div className="mb-4 text-3xl font-bold tracking-[0.4em] text-slate-400">{w.split('').join(' ')}</div>
+            <div className={`mb-2 text-7xl font-black sm:text-8xl text-accent-deep`}>{w}</div>
+            <div className="mb-4 text-3xl font-bold tracking-[0.4em] text-ink-soft">{w.split('').join(' ')}</div>
             <div className="flex flex-wrap justify-center gap-2">
               <SpeakButton label="Say it" onClick={() => void speak(w)} />
               <SpeakButton
@@ -120,19 +120,19 @@ function makePictureWord(level: Level): QuizQuestion {
 export const readingModes: ModeDef[] = [
   {
     id: 'cards', title: 'Sight Words', emoji: '👀', desc: 'Words you see everywhere',
-    render: p => <SightWordCards theme={p.theme} onResult={p.onResult} />,
+    render: p => <SightWordCards onResult={p.onResult} />,
   },
   {
     id: 'find', title: 'Find the Word', emoji: '🎧', desc: 'Listen, then tap the word',
-    render: p => <Quiz makeQuestion={makeFindWord} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeFindWord} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'sentence', title: 'Fill the Gap', emoji: '📖', desc: 'Finish the sentence',
-    render: p => <Quiz makeQuestion={makeSentence} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeSentence} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'picture', title: 'Picture Words', emoji: '🖼️', desc: 'Match the word to the picture',
-    render: p => <Quiz makeQuestion={makePictureWord} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makePictureWord} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
 ];
 

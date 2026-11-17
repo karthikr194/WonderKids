@@ -15,19 +15,19 @@ export interface Profile {
   avatar: string;
   stickers: string[];
   stats: Record<SectionId, SectionStats>;
+  /** Stars earned today, for the daily goal. */
+  today?: { date: string; stars: number };
 }
 
 export const AVATARS = ['🦁', '🦄', '🦖', '🚀', '🐱', '🐼', '🤖', '👑'];
 
 export type Level = 1 | 2 | 3;
 
-/** Tailwind class bundle for a section. Classes are written out in full so Tailwind can see them. */
+/** A section's colours. Applied as CSS variables, used through the accent-* Tailwind colours. */
 export interface Theme {
-  /** solid fill, e.g. bg-rose-500 */ solid: string;
-  /** pale background */ soft: string;
-  /** border colour */ border: string;
-  /** text colour */ text: string;
-  /** card gradient */ gradient: string;
+  accent: string;
+  soft: string;
+  deep: string;
 }
 
 export interface ModeProps {

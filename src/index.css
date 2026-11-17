@@ -1,24 +1,67 @@
 @import 'tailwindcss';
 
+/* ---------- design tokens ---------- */
 @theme {
-  --font-sans: 'Fredoka Variable', ui-rounded, 'Comic Sans MS', system-ui, sans-serif;
+  --font-sans: 'Fredoka Variable', ui-rounded, system-ui, sans-serif;
+  --color-ink: #23264a;
+  --color-ink-soft: #5b5f86;
+  --color-cream: #fff6e5;
+  --color-paper: #fffdf8;
+  --color-good: #22c55e;
+  --color-good-soft: #dcfce7;
+  --color-oops: #fb923c;
+  --color-oops-soft: #ffedd5;
+  --color-sun: #ffc93c;
+}
+
+/* Section colours come from CSS variables set on the screen root (see themeStyle()). */
+@theme inline {
+  --color-accent: var(--accent, #5b6cff);
+  --color-accent-soft: var(--accent-soft, #e2e5ff);
+  --color-accent-deep: var(--accent-deep, #3341c2);
+}
+
+/* Chunky "sticker" surfaces: ink outline + hard offset shadow; buttons press down. */
+@utility chunky {
+  border: 3px solid var(--color-ink);
+  box-shadow: 0 5px 0 0 var(--color-ink);
+  transition: transform 80ms ease, box-shadow 80ms ease, background-color 150ms ease;
+  &:is(button):not(:disabled):active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 0 var(--color-ink);
+  }
+}
+@utility chunky-sm {
+  border: 2.5px solid var(--color-ink);
+  box-shadow: 0 3px 0 0 var(--color-ink);
+  transition: transform 80ms ease, box-shadow 80ms ease;
+  &:is(button):not(:disabled):active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 0 var(--color-ink);
+  }
 }
 
 html, body, #root { min-height: 100dvh; }
 
 body {
-  background: linear-gradient(180deg, #fef9c3 0%, #fde68a 100%);
-  background-attachment: fixed;
+  color: var(--color-ink);
+  background-color: var(--color-cream);
+  background-image: radial-gradient(rgb(35 38 74 / 0.07) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
 button { cursor: pointer; user-select: none; }
-button:focus-visible, input:focus-visible { outline: 4px solid #2563eb; outline-offset: 2px; }
+button:disabled { cursor: default; }
+button:focus-visible, input:focus-visible { outline: 4px solid #4d96ff; outline-offset: 3px; }
 
 ::-webkit-scrollbar { display: none; }
 * { scrollbar-width: none; }
+
+@keyframes bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
+.animate-bob { animation: bob 2.6s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }

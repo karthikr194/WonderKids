@@ -43,7 +43,7 @@ function makeColor(level: Level): QuizQuestion {
     prompt: `${mix.a} + ${mix.b} = ?`,
     audio: () => speak(`What colour do you get when you mix ${mix.a} and ${mix.b}?`),
     visual: (
-      <div className="flex items-center gap-3 text-4xl font-black text-slate-400">
+      <div className="flex items-center gap-3 text-4xl font-black text-ink-soft">
         <Swatch hex={colorByName(mix.a).hex} size="h-16 w-16" /> + <Swatch hex={colorByName(mix.b).hex} size="h-16 w-16" /> = ❓
       </div>
     ),
@@ -96,10 +96,10 @@ function makeShape(level: Level): QuizQuestion {
 export const shapesColorsModes: ModeDef[] = [
   {
     id: 'colors', title: 'Colours', emoji: '🎨', desc: 'Names, objects and colour mixing',
-    render: p => <Quiz makeQuestion={makeColor} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeColor} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
   {
     id: 'shapes', title: 'Shapes', emoji: '🔷', desc: 'Name shapes and count their sides',
-    render: p => <Quiz makeQuestion={makeShape} level={p.level} theme={p.theme} onResult={p.onResult} onExit={p.onExit} />,
+    render: p => <Quiz makeQuestion={makeShape} level={p.level} onResult={p.onResult} onExit={p.onExit} />,
   },
 ];
