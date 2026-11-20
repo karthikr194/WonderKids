@@ -1,6 +1,7 @@
 const REVISION = 'dev-revision';
 const SHELL_CACHE = `wonderkids-shell-${REVISION}`;
 const LESSON_CACHE = 'wonderkids-lesson-assets-v1';
+const PICTURE_CACHE = 'wonderkids-lesson-pictures-v2';
 const BUILD_ASSETS = [];
 const SHELL = ['/', '/manifest.json', '/icon.svg', '/icon-192.png', '/icon-512.png', ...BUILD_ASSETS];
 const managedAsset = path => /^\/(learning\/(pictures|audio)|audio\/phonics)\//.test(path);
@@ -28,7 +29,8 @@ self.addEventListener('fetch', event => {
     return;
   }
   if (!managedAsset(url.pathname)) return;
-  event.respondWith(caches.open(LESSON_CACHE).then(async cache => {
+  const cacheName = url.pathname.startsWith('/learning/pictures/') ? PICTURE_CACHE : LESSON_CACHE;
+  event.respondWith(caches.open(cacheName).then(async cache => {
     // Fetch a full same-origin representation so future visits can play the downloaded clip offline.
     const cached = await cache.match(url.href);
     if (cached) return cached;
