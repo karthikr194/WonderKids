@@ -33,11 +33,11 @@ function AnimalExplorer({ onResult }: Pick<ModeProps, 'onResult'>) {
       itemKey={a => a.name}
      
       gridClass="grid-cols-4 sm:grid-cols-6"
-      renderTile={a => <span className="text-4xl sm:text-5xl">{a.emoji}</span>}
+      renderTile={a => <OptionEmoji>{a.emoji}</OptionEmoji>}
       onOpen={a => { onResult(true); void speakSequence([a.name, { text: `${a.name} says ${a.sound}!`, rate: 0.9 }]); }}
       renderCard={a => (
         <div>
-          <div className="text-8xl" aria-hidden>{a.emoji}</div>
+          <div className="flex justify-center"><BigEmoji>{a.emoji}</BigEmoji></div>
           <div className={`mb-1 text-4xl font-black text-accent-deep`}>{a.name}</div>
           <div className="mb-3 text-3xl font-black text-ink">“{a.sound}!”</div>
           <div className="mb-3 grid grid-cols-3 gap-2 text-sm font-bold text-ink sm:text-base">

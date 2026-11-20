@@ -61,7 +61,9 @@ export function onSpeechStop(listener: () => void) {
 export function stopSpeaking() {
   stopListeners.forEach(listener => listener());
   generation++;
-  synth()?.cancel();
+  const engine = synth();
+  engine?.cancel();
+  if (engine?.paused) engine.resume();
   currentAudio?.pause();
   currentAudio = null;
 }

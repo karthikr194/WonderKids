@@ -70,9 +70,10 @@ root-relative paths in `src/learning/recordings.json`. Supported kinds are
 the English letter name or a trailing vowel. Confirm the recording's licence
 and native-speaker review before shipping it.
 
-This draft ships no reviewed recordings. Names, words and sentences can play
-through a matching device voice. Isolated sounds in the guided course require
-a recording. When audio is missing, children can continue with the visual
+The draft includes a starter set of attributed Wikimedia Commons recordings.
+See [audio credits](public/learning/audio/CREDITS.md) for their sources.
+Unrecorded names, words and sentences can play through a matching device
+voice. Isolated sounds in the guided course require a recording. When audio is missing, children can continue with the visual
 lesson. Repetition is self-guided and does not grade spoken pronunciation.
 
 ### Offline and verification

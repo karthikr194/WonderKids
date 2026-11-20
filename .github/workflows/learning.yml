@@ -21,9 +21,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint && npm test && npm run build
-      - run: npx playwright install --with-deps chromium
       - name: Verify lesson flows in Chromium
         run: |
+          if command -v google-chrome >/dev/null; then
+            export PLAYWRIGHT_CHROMIUM_EXECUTABLE="$(command -v google-chrome)"
+          else
+            npx playwright install chromium
+          fi
           npm run preview -- --host 127.0.0.1 --strictPort &
           for attempt in {1..30}; do
             if curl -fsS http://127.0.0.1:4173/ > /dev/null; then break; fi

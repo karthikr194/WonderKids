@@ -46,7 +46,8 @@ export function LanguageCourse({ initial, progress, update, onBack, onToggleSoun
   const available = courses[language];
   const [groupChoice, setGroupChoice] = useState<string>();
   const current = available.find(item => item.id === stats.current);
-  const group = groupChoice ?? current?.group ?? available[0].group;
+  const resume = current && stats.lessons[current.id]?.mastered ? nextLesson(current) ?? current : current ?? available[0];
+  const group = groupChoice ?? resume.group;
   const open = (item?: Lesson) => {
     stopSpeaking();
     setLesson(item);
@@ -76,8 +77,8 @@ export function LanguageCourse({ initial, progress, update, onBack, onToggleSoun
           ...prior, [language]: recordAttempt(prior[language] ?? emptyCourse(), lesson, correct, complete, localDate()),
         }))} onNext={() => open(nextLesson(lesson))} /> : <>
         <div className="wk-panel wk-course-banner" style={{ background: languageInfo[language].color }}>
-          <div><h2>Continue learning</h2><p lang={language}>{(current ?? available[0]).group}</p>
-          <button className="wk-button wk-primary" onClick={() => open(current ?? available[0])}>Start lesson</button></div>
+          <div><h2>Continue learning</h2><p lang={language}>{resume.group}</p>
+          <button className="wk-button wk-primary" onClick={() => open(resume)}>Start lesson</button></div>
           <Picture asset={languageInfo[language].art} label="" />
         </div>
         <label className="wk-unit">Choose a unit

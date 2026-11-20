@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { test } from 'node:test';
+import recordings from '../src/learning/recordings.json';
 import { courses, lessonOptions } from '../src/learning/curriculum';
 import { emptyCourse, nextLesson, readProgress, recordAttempt, saveProgress } from '../src/learning/progress';
 import { mayUseDeviceSpeech, pickVoice } from '../src/learning/voices';
@@ -64,4 +65,15 @@ test('audio fallback requires a matching locale and never substitutes letter nam
   assert.equal(pickVoice([en, hi], 'hi-IN', true), undefined);
   assert.equal(mayUseDeviceSpeech('sound'), false);
   assert.equal(mayUseDeviceSpeech('word'), true);
+});
+
+test('packaged recordings reference real audio files and existing lessons', () => {
+  const ids = new Set(Object.values(courses).flat().map(lesson => lesson.id));
+  assert.ok(recordings.length > 0);
+  assert.equal(new Set(recordings).size, recordings.length);
+  for (const path of recordings) {
+    assert.ok(existsSync(`public${path}`), path);
+    const match = path.match(/^\/learning\/audio\/(en|hi|ta)\/(.+)-(name|sound|word|sentence)\.mp3$/);
+    assert.ok(match && match[2].startsWith(`${match[1]}-`) && ids.has(match[2]), path);
+  }
 });

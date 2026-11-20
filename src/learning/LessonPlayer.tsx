@@ -7,7 +7,7 @@ import { stopSpeaking } from '../lib/speech';
 import { Picture } from './Picture';
 import { BuildWord, LetterTracing } from './Practice';
 import { lessonOptions, type Lesson } from './curriculum';
-import { playTeachingAudio, type AudioKind, type Playback } from './audio';
+import { pauseTeachingAudio, playTeachingAudio, resumeTeachingAudio, type AudioKind, type Playback } from './audio';
 
 const steps = ['Meet', 'Sound', 'Picture', 'Repeat', 'Find', 'Practice', 'Reward'];
 const encouragement = { en: 'Great work!', hi: 'बहुत बढ़िया!', ta: 'மிக நன்று!' };
@@ -110,7 +110,9 @@ export function LessonPlayer({ lesson, soundOn, onAttempt, onNext, mastered }: {
       </>}
       <div className="wk-controls">
         {step < 5 && <button className="wk-button" aria-pressed={slow} onClick={() => setSlow(!slow)}>{slow ? 'Slow speed on' : 'Slow speed'}</button>}
-        {playback === 'playing' && <button className="wk-button" onClick={stopSpeaking}>Stop audio</button>}
+        {playback === 'playing' && <button className="wk-button" onClick={pauseTeachingAudio}>Pause audio</button>}
+        {playback === 'paused' && <button className="wk-button" onClick={resumeTeachingAudio}>Resume audio</button>}
+        {(playback === 'playing' || playback === 'paused') && <button className="wk-button" onClick={stopSpeaking}>Stop audio</button>}
         {playback === 'unavailable' && <p role="status">Audio is unavailable for this clip on this device.</p>}
       </div>
       {(step < 4 || step === 4 && found) &&

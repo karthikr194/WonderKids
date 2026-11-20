@@ -10,7 +10,7 @@ import { isSpellable, numberToWords, spellableWord, spokenNumber } from '../lib/
 import type { Level, ModeDef, ModeProps } from '../types';
 
 const MAX: Record<Level, number> = { 1: 10, 2: 20, 3: 100 };
-const FRUIT = ['🍎', '🍓', '🐟', '⭐', '🎈', '🍪', '🦋', '🚗'];
+const FRUIT = ['🍎', '🐟', '🍇', '⚽', '🍦', '🥭', '🚐', '🍊'];
 
 /** Numbers worth asking about at a level – at level 3 it favours tens and teens, not just random. */
 function pickNumber(level: Level, min = 0): number {

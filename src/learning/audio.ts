@@ -2,9 +2,14 @@ import { isSoundEnabled, stopSpeaking, onSpeechStop } from '../lib/speech';
 import { mayUseDeviceSpeech, pickVoice } from './voices';
 import type { Lesson } from './curriculum';
 
-export type AudioKind = 'name' | 'sound' | 'word' | 'sentence';
-export type Playback = 'idle' | 'playing' | 'unavailable';
 import recordings from './recordings.json';
+
+export type AudioKind = 'name' | 'sound' | 'word' | 'sentence';
+export type Playback = 'idle' | 'playing' | 'paused' | 'unavailable';
+
+let controller: { pause: () => void; resume: () => void } | undefined;
+export const pauseTeachingAudio = () => controller?.pause();
+export const resumeTeachingAudio = () => controller?.resume();
 
 const assets = new Set<string>(recordings);
 export const recordingPath = (lesson: Lesson, kind: AudioKind) => {
@@ -21,6 +26,7 @@ export function playTeachingAudio(lesson: Lesson, kind: AudioKind, slow: boolean
   let cancelled = false;
   const unsubscribe = onSpeechStop(() => {
     cancelled = true;
+    controller = undefined;
     audio?.pause();
     clearTimeout(timer);
     unsubscribe();
@@ -29,6 +35,7 @@ export function playTeachingAudio(lesson: Lesson, kind: AudioKind, slow: boolean
   const finish = (state: Playback) => {
     if (cancelled) return;
     cancelled = true;
+    controller = undefined;
     clearTimeout(timer);
     unsubscribe();
     update(state);
@@ -50,11 +57,25 @@ export function playTeachingAudio(lesson: Lesson, kind: AudioKind, slow: boolean
     utterance.rate = slow ? 0.65 : 0.85;
     utterance.onend = () => finish('idle');
     utterance.onerror = () => finish('unavailable');
-    timer = setTimeout(() => {
+    const watchdog = () => setTimeout(() => {
       finish('unavailable');
       synth.cancel();
     }, 3500 + message.length * 240);
+    timer = watchdog();
+    controller = {
+      pause: () => {
+        clearTimeout(timer);
+        synth.pause();
+        update('paused');
+      },
+      resume: () => {
+        timer = watchdog();
+        synth.resume();
+        update('playing');
+      },
+    };
     update('playing');
+    if (synth.paused) synth.resume();
     synth.speak(utterance);
   };
   if (recorded) {
@@ -65,10 +86,32 @@ export function playTeachingAudio(lesson: Lesson, kind: AudioKind, slow: boolean
     const fail = () => {
       if (failed || cancelled) return;
       failed = true;
+      clearTimeout(timer);
+      audio?.pause();
       fallback();
     };
     audio.onerror = fail;
-    update('playing');
-    audio.play().catch(fail);
+    const clip = audio;
+    let playVersion = 0;
+    const start = () => {
+      const version = ++playVersion;
+      clearTimeout(timer);
+      timer = setTimeout(fail, 10_000);
+      update('playing');
+      clip.play().then(
+        () => { if (version === playVersion) clearTimeout(timer); },
+        () => { if (version === playVersion) fail(); },
+      );
+    };
+    controller = {
+      pause: () => {
+        playVersion++;
+        clearTimeout(timer);
+        clip.pause();
+        update('paused');
+      },
+      resume: start,
+    };
+    start();
   } else fallback();
 }
