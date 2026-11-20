@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
 
 export type SectionId =
-  | 'phonics' | 'numberWords' | 'reading' | 'math' | 'time' | 'world' | 'shapesColors' | 'brain';
+  | 'phonics' | 'numberWords' | 'reading' | 'math' | 'time' | 'world' | 'shapesColors' | 'brain' | 'guided';
 
 export const SECTION_IDS: SectionId[] = [
-  'phonics', 'numberWords', 'reading', 'math', 'time', 'world', 'shapesColors', 'brain',
+  'phonics', 'numberWords', 'reading', 'math', 'time', 'world', 'shapesColors', 'brain', 'guided',
 ];
 
 export interface SectionStats { xp: number; streak: number; correct: number; attempts: number }
