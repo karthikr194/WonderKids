@@ -77,3 +77,47 @@ test('packaged recordings reference real audio files and existing lessons', () =
     assert.ok(match && match[2].startsWith(`${match[1]}-`) && ids.has(match[2]), path);
   }
 });
+
+// ---------- guided English & phonics lessons (ported from PR #1) ----------
+import { guidedKey, guidedLessons, markComplete, readCompleted, writeCompleted } from '../src/data/guidedLessons';
+import { PHONEME_BY_GRAPHEME } from '../src/data/phonics';
+
+test('guided lessons: answers are offered, ids unique, blends match their word, sounds are known', () => {
+  assert.equal(guidedLessons.english.length, 4);
+  assert.equal(guidedLessons.phonics.map(l => l.focus).join(','), 's,a,t,p,i,n,sat,pin,tap');
+  const all = Object.values(guidedLessons).flat();
+  assert.equal(new Set(all.map(l => l.id)).size, all.length);
+  for (const lesson of all) {
+    assert.ok(lesson.options.includes(lesson.answer), lesson.id);
+    assert.equal(new Set(lesson.options).size, lesson.options.length, lesson.id);
+    if (lesson.blend) assert.equal(lesson.blend.join(''), lesson.focus, lesson.id);
+  }
+  for (const lesson of guidedLessons.phonics) {
+    for (const unit of lesson.blend ?? [lesson.focus]) assert.ok(PHONEME_BY_GRAPHEME[unit], `${lesson.id}: ${unit}`);
+  }
+});
+
+test('guided lessons: completion is saved per player, replay does not duplicate, blocked storage is safe', () => {
+  const data = new Map<string, string>();
+  const store = { getItem: (k: string) => data.get(k) ?? null, setItem: (k: string, v: string) => void data.set(k, v) };
+  const mia = guidedKey('mia', 'phonics');
+  const sam = guidedKey('sam', 'phonics');
+
+  let done = markComplete([], 'sound-s');
+  done = markComplete(done, 'sound-s');
+  assert.deepEqual(done, ['sound-s']);
+  assert.equal(writeCompleted(store, mia, done), true);
+  assert.deepEqual(readCompleted(store, mia, 'phonics'), ['sound-s']);
+  assert.deepEqual(readCompleted(store, sam, 'phonics'), []);
+  assert.deepEqual(readCompleted(store, guidedKey('mia', 'english'), 'english'), []);
+
+  data.set(mia, JSON.stringify(['sound-s', 'not-a-lesson', 42, 'sound-s']));
+  assert.deepEqual(readCompleted(store, mia, 'phonics'), ['sound-s']);
+  data.set(mia, '{oops');
+  assert.deepEqual(readCompleted(store, mia, 'phonics'), []);
+
+  const blocked = { getItem: () => { throw new Error('denied'); }, setItem: () => { throw new Error('denied'); } };
+  assert.deepEqual(readCompleted(blocked, mia, 'phonics'), []);
+  assert.equal(writeCompleted(blocked, mia, ['sound-s']), false);
+  assert.equal(writeCompleted(undefined, mia, ['sound-s']), false);
+});
