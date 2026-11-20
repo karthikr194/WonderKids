@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Quiz, type QuizQuestion } from '../components/engines/Quiz';
 import { Button } from '../components/ui/Button';
+import { legacyPicture } from '../learning/legacyPictures';
 import { OptionEmoji } from '../components/ui/Visuals';
 import { speak } from '../lib/speech';
 import { sfx } from '../lib/sfx';
@@ -14,7 +15,7 @@ import type { Level, ModeDef, ModeProps } from '../types';
 
 // ---------- memory ----------
 
-const MEMORY_EMOJI = ['🐶', '🐱', '🐭', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐸'];
+const MEMORY_EMOJI = ['🐶', '🐱', '🐭', '🐰', '🦊', '🐻', '🐘', '🐐', '🐯', '🦁', '🐪', '🦓'];
 interface Card { id: number; emoji: string; matched: boolean }
 
 function Memory({ level, onResult, onExit }: ModeProps) {
@@ -62,7 +63,7 @@ function Memory({ level, onResult, onExit }: ModeProps) {
               key={c.id}
               data-card
               type="button"
-              aria-label={shown ? c.emoji : 'Hidden card'}
+              aria-label={shown ? legacyPicture(c.emoji) : 'Hidden card'}
               onClick={() => flip(c.id)}
               animate={{ rotateY: shown ? 180 : 0 }}
               transition={{ duration: 0.3 }}
@@ -73,7 +74,7 @@ function Memory({ level, onResult, onExit }: ModeProps) {
               <span
                 className={`absolute inset-0 flex items-center justify-center rounded-2xl border-[3px] border-ink text-5xl shadow-[0_4px_0_0_var(--color-ink)] sm:text-6xl ${c.matched ? 'bg-good-soft' : 'bg-paper'}`}
                 style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
-              >{c.emoji}</span>
+              >{shown && <OptionEmoji>{c.emoji}</OptionEmoji>}</span>
             </motion.button>
           );
         })}

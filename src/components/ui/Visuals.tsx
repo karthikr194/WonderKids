@@ -1,26 +1,33 @@
+import { legacyPicture } from '../../learning/legacyPictures';
+import { Picture } from '../../learning/Picture';
 import type { ShapeItem } from '../../data/shapesColors';
 
-export const BigEmoji = ({ children }: { children: string }) => (
-  <span className="text-8xl leading-none sm:text-9xl" aria-hidden>{children}</span>
-);
+export function BigEmoji({ children }: { children: string }) {
+  const art = legacyPicture(children);
+  return art ? <Picture asset={art} label={art.replaceAll('-', ' ')} large />
+    : <span className="text-8xl leading-none sm:text-9xl" aria-hidden>{children}</span>;
+}
 
 export const OptionText = ({ children, small = false }: { children: React.ReactNode; small?: boolean }) => (
   <span className={`font-black leading-none ${small ? 'text-3xl' : 'text-5xl sm:text-6xl'}`}>{children}</span>
 );
 
-export const OptionEmoji = ({ children }: { children: string }) => (
-  <span className="text-6xl leading-none" aria-hidden>{children}</span>
-);
+export function OptionEmoji({ children }: { children: string }) {
+  const art = legacyPicture(children);
+  return art ? <span className="inline-flex w-[1em] text-6xl"><Picture asset={art} label={art.replaceAll('-', ' ')} /></span>
+    : <span className="text-6xl leading-none" aria-hidden>{children}</span>;
+}
 
 /** A row of repeated emoji; `crossed` of them are shown struck out (for subtraction). */
 export function EmojiGroup({ emoji, count, crossed = 0, size = 'text-4xl' }: {
   emoji: string; count: number; crossed?: number; size?: string;
 }) {
+  const art = legacyPicture(emoji);
   return (
-    <div className={`flex max-w-sm flex-wrap justify-center gap-1 ${size}`} role="img" aria-label={`${count} ${emoji}`}>
+    <div className={`flex max-w-sm flex-wrap justify-center gap-1 ${size}`} role="img" aria-label={`${count} ${art ?? emoji}`}>
       {Array.from({ length: count }, (_, i) => (
         <span key={i} className={`relative ${i >= count - crossed ? 'opacity-30 grayscale' : ''}`} aria-hidden>
-          {emoji}
+          {art ? <span className="inline-flex w-[1em]"><Picture asset={art} label="" /></span> : emoji}
           {i >= count - crossed && <span className="absolute inset-0 flex items-center justify-center text-red-500">✕</span>}
         </span>
       ))}

@@ -52,9 +52,18 @@ export type Part = string | Utterance;
 
 export const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
+const stopListeners = new Set<() => void>();
+export function onSpeechStop(listener: () => void) {
+  stopListeners.add(listener);
+  return () => { stopListeners.delete(listener); };
+}
+
 export function stopSpeaking() {
+  stopListeners.forEach(listener => listener());
   generation++;
-  synth()?.cancel();
+  const engine = synth();
+  engine?.cancel();
+  if (engine?.paused) engine.resume();
   currentAudio?.pause();
   currentAudio = null;
 }
@@ -83,8 +92,8 @@ function utter(u: Utterance): Promise<void> {
 /** Speak parts one after another. Starting a new sequence cancels the previous one. */
 export async function speakSequence(parts: Part[]): Promise<void> {
   if (!soundOn) { parts.forEach(p => typeof p !== 'string' && p.onStart?.()); return; }
-  const mine = ++generation;
-  synth()?.cancel();
+  stopSpeaking();
+  const mine = generation;
   for (const part of parts) {
     if (mine !== generation) return;
     const u = typeof part === 'string' ? { text: part } : part;

@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useLearningProgress } from './learning/useLearningProgress';
+import { languageInfo, languages, type Language } from './learning/curriculum';
+import { Picture } from './learning/Picture';
+import { LanguageCourse } from './components/LanguageCourse';
 import { Onboarding } from './components/Onboarding';
 import { Home } from './components/Home';
 import { SectionScreen } from './components/SectionScreen';
-import { SECTIONS } from './sections';
 import { useProfile } from './store';
 import { setSoundEnabled, stopSpeaking } from './lib/speech';
 import { sfx } from './lib/sfx';
@@ -15,7 +18,23 @@ const SOUND_KEY = 'wonderkids:sound';
 const readSound = () => { try { return localStorage.getItem(SOUND_KEY) !== 'off'; } catch { return true; } };
 
 export default function App() {
-  const { profile, setProfile, record, signOut } = useProfile();
+  const player = useProfile();
+  if (!player.profile) return <>
+    {player.players.length > 0 && <section className="wk-shell">
+      <h2 className="mb-3 text-xl font-bold">Choose a player</h2>
+      <div className="flex flex-wrap gap-2">{player.players.map(profile =>
+        <button key={profile.id} className="wk-button" onClick={() => player.setProfile(profile)}>{profile.avatar} {profile.name}</button>)}</div>
+    </section>}
+    <Onboarding onComplete={player.setProfile} />
+  </>;
+  return <LearningApp key={player.profile.id} profile={player.profile} record={player.record} signOut={player.signOut} />;
+}
+
+function LearningApp({ profile, record, signOut }: Pick<ReturnType<typeof useProfile>, 'record' | 'signOut'> & {
+  profile: NonNullable<ReturnType<typeof useProfile>['profile']>;
+}) {
+  const { progress, update } = useLearningProgress(profile.id ?? 'original');
+  const [languageCourse, setLanguageCourse] = useState<Language | 'parent'>();
   const [section, setSection] = useState<SectionDef | null>(null);
   const [mode, setMode] = useState<ModeDef | null>(null);
   const [soundOn, setSoundOn] = useState(readSound);
@@ -38,22 +57,23 @@ export default function App() {
     stickerCount.current = n;
   }, [profile]);
 
-  if (!profile) return <Onboarding onComplete={setProfile} />;
-
-  const goHome = () => { setSection(null); setMode(null); };
+  const goHome = () => { setSection(null); setMode(null); setLanguageCourse(undefined); };
   const goBack = () => (mode ? setMode(null) : goHome());
 
   return (
     <div className="min-h-dvh">
       <AnimatePresence mode="wait">
         <motion.div
-          key={`${section?.id ?? 'home'}-${mode?.id ?? 'menu'}`}
+          key={`${languageCourse ? 'languages' : section?.id ?? 'home'}-${mode?.id ?? 'menu'}`}
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -40 }}
           transition={{ duration: 0.18 }}
         >
-          {section ? (
+          {languageCourse ? (
+            <LanguageCourse initial={languageCourse} progress={progress} update={update} soundOn={soundOn}
+              onToggleSound={() => setSoundOn(value => !value)} onBack={goHome} />
+          ) : section ? (
             <SectionScreen
               section={section}
               mode={mode}
@@ -65,13 +85,26 @@ export default function App() {
               onResult={ok => record(section.id, ok)}
             />
           ) : (
-            <Home
-              profile={profile}
-              soundOn={soundOn}
-              onToggleSound={() => setSoundOn(s => !s)}
-              onOpen={s => { stopSpeaking(); setSection(SECTIONS.find(x => x.id === s.id)!); }}
-              onSignOut={() => { if (window.confirm('Switch player? This clears the current player\'s stars and stickers.')) signOut(); }}
-            />
+            <Home profile={profile} soundOn={soundOn} onToggleSound={() => setSoundOn(s => !s)}
+              onOpen={s => { stopSpeaking(); setSection(s); }}
+              onSignOut={() => { stopSpeaking(); signOut(); }}
+              languagePanel={<section className="wk-panel">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2>Learn with Ollie</h2>
+                  <button className="wk-button" onClick={() => setLanguageCourse('parent')}>Parent dashboard</button>
+                </div>
+                <div className="wk-home-grid">{languages.map(language => <button key={language} lang={language}
+                  className="wk-home-card" style={{ background: languageInfo[language].color }}
+                  onClick={() => setLanguageCourse(language)}>
+                  <Picture asset={languageInfo[language].art} label="" />{languageInfo[language].title}
+                </button>)}</div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button className="wk-button wk-primary" onClick={() => setLanguageCourse(
+                    [...languages].sort((a, b) => (progress[b]?.lastPracticed ?? '').localeCompare(progress[a]?.lastPracticed ?? ''))[0]
+                  )}>Continue learning</button>
+                  <span>{Object.values(progress).reduce((total, course) => total + course.stars, 0)} language stars</span>
+                </div>
+              </section>} />
           )}
         </motion.div>
       </AnimatePresence>

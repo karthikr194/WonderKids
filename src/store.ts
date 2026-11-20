@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Level, Profile, SECTION_IDS, SectionId, SectionStats } from './types';
 
 const KEY = 'wonderkids:v2';
+const ARCHIVE_KEY = 'wonderkids:players:v1';
 
 export const STICKERS = [
   '🦖', '🦄', '🚀', '🌟', '🍭', '🍕', '🎮', '🌈', '🎸', '⚽', '🦋', '🍦',
@@ -23,6 +24,7 @@ export function levelProgress(p: Profile, id: SectionId): number {
 const emptyStats = (): SectionStats => ({ xp: 0, streak: 0, correct: 0, attempts: 0 });
 
 export const newProfile = (name: string, age: number, avatar: string): Profile => ({
+  id: globalThis.crypto?.randomUUID?.() ?? String(Date.now()),
   name, age, avatar, stickers: [],
   stats: Object.fromEntries(SECTION_IDS.map(id => [id, emptyStats()])) as Profile['stats'],
 });
@@ -33,6 +35,7 @@ function load(): Profile | null {
     if (!raw) return null;
     const p = JSON.parse(raw) as Profile;
     if (!p?.name || !p.stats) return null;
+    p.id ??= 'original';
     // Forward-compat: make sure every section has stats.
     for (const id of SECTION_IDS) p.stats[id] ??= emptyStats();
     return p;
@@ -76,14 +79,31 @@ export function applyResult(p: Profile, id: SectionId, correct: boolean): Profil
   return { ...p, stickers, today, stats: { ...p.stats, [id]: next } };
 }
 
+function savedPlayers(): Profile[] {
+  try {
+    const value = JSON.parse(localStorage.getItem(ARCHIVE_KEY) ?? '[]');
+    return Array.isArray(value) ? value : [];
+  } catch { return []; }
+}
+
 export function useProfile() {
   const [profile, setProfile] = useState<Profile | null>(load);
+  const [players, setPlayers] = useState(savedPlayers);
   useEffect(() => save(profile), [profile]);
 
   const record = useCallback(
     (id: SectionId, correct: boolean) => setProfile(p => (p ? applyResult(p, id, correct) : p)),
     [],
   );
-  const signOut = useCallback(() => setProfile(null), []);
-  return { profile, setProfile, record, signOut };
+  const signOut = useCallback(() => {
+    if (!profile?.id) return;
+    const next = [...players.filter(player => player.id !== profile.id), profile];
+    try { localStorage.setItem(ARCHIVE_KEY, JSON.stringify(next)); } catch {
+      // Keep the active profile if archiving it would lose the saved copy.
+      return;
+    }
+    setPlayers(next);
+    setProfile(null);
+  }, [profile, players]);
+  return { profile, setProfile, record, signOut, players };
 }

@@ -5,7 +5,7 @@ import { pick, randInt, withDistractors } from '../lib/random';
 import { numberToWords, spokenNumber } from '../lib/numberWords';
 import type { Level, ModeDef } from '../types';
 
-const THINGS = ['🍎', '🍓', '🐟', '⭐', '🎈', '🍪', '🦋', '🚗', '🐥', '🍩'];
+const THINGS = ['🍎', '🐟', '🍇', '⚽', '🪁', '🍦', '🥭', '🚐', '🍊', '🍰'];
 const numeral = (n: number) => ({ id: String(n), visual: <OptionText>{n}</OptionText>, speak: spokenNumber(n) });
 
 const numberChoices = (answer: number, max: number, count = 3) =>

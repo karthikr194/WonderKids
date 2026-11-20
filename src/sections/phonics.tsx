@@ -49,7 +49,7 @@ function SoundExplorer({ items, isLetters, onResult }: Pick<ModeProps, 'onResult
                 onClick={() => void speakSequence([{ text: p.say, rate: 0.55, pitch: 1, pause: 250 }, { text: w.word, rate: 0.8 }])}
                 className="flex items-center gap-2 rounded-2xl bg-cream px-4 py-2 text-2xl font-black text-ink chunky-sm"
               >
-                <span className="text-4xl" aria-hidden>{w.emoji}</span>
+                <OptionEmoji>{w.emoji}</OptionEmoji>
                 <span>
                   {w.word.startsWith(p.grapheme)
                     ? <><span className="text-accent-deep">{p.grapheme}</span>{w.word.slice(p.grapheme.length)}</>
