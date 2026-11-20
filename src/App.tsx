@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { LanguageCourse } from './components/LanguageCourse';
 import { Onboarding } from './components/Onboarding';
 import { Home } from './components/Home';
 import { SectionScreen } from './components/SectionScreen';
@@ -16,6 +17,7 @@ const readSound = () => { try { return localStorage.getItem(SOUND_KEY) !== 'off'
 
 export default function App() {
   const { profile, setProfile, record, signOut } = useProfile();
+  const [languageCourse, setLanguageCourse] = useState(false);
   const [section, setSection] = useState<SectionDef | null>(null);
   const [mode, setMode] = useState<ModeDef | null>(null);
   const [soundOn, setSoundOn] = useState(readSound);
@@ -40,20 +42,22 @@ export default function App() {
 
   if (!profile) return <Onboarding onComplete={setProfile} />;
 
-  const goHome = () => { setSection(null); setMode(null); };
+  const goHome = () => { setSection(null); setMode(null); setLanguageCourse(false); };
   const goBack = () => (mode ? setMode(null) : goHome());
 
   return (
     <div className="min-h-dvh">
       <AnimatePresence mode="wait">
         <motion.div
-          key={`${section?.id ?? 'home'}-${mode?.id ?? 'menu'}`}
+          key={`${languageCourse ? 'languages' : section?.id ?? 'home'}-${mode?.id ?? 'menu'}`}
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -40 }}
           transition={{ duration: 0.18 }}
         >
-          {section ? (
+          {languageCourse ? (
+            <LanguageCourse onBack={goHome} />
+          ) : section ? (
             <SectionScreen
               section={section}
               mode={mode}
@@ -65,13 +69,13 @@ export default function App() {
               onResult={ok => record(section.id, ok)}
             />
           ) : (
-            <Home
+            <div><button className="mx-auto mt-4 block w-[min(92%,42rem)] rounded-2xl border-2 border-black bg-yellow-300 p-4 text-xl font-black shadow-md" onClick={() => setLanguageCourse(true)}>🌈 Learn English · हिन्दी · தமிழ் — Play Now!</button><Home
               profile={profile}
               soundOn={soundOn}
               onToggleSound={() => setSoundOn(s => !s)}
               onOpen={s => { stopSpeaking(); setSection(SECTIONS.find(x => x.id === s.id)!); }}
               onSignOut={() => { if (window.confirm('Switch player? This clears the current player\'s stars and stickers.')) signOut(); }}
-            />
+            /></div>
           )}
         </motion.div>
       </AnimatePresence>
