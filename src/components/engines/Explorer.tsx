@@ -28,7 +28,7 @@ export function Explorer<T>({
 
   // A different item list (e.g. new filter) closes the card.
   const signature = items.map(itemKey).join(',');
-  useEffect(() => setIndex(null), [signature]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => setIndex(null), [signature]);
 
   const open = (i: number) => {
     const n = (i + items.length) % items.length;

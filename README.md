@@ -42,3 +42,57 @@ A new quiz is just a function `(level) => QuizQuestion` handed to `<Quiz />`; a 
 ## Phonics sound quality
 
 Browsers can't speak a bare phoneme from a letter, so each sound has a spoken respelling (`say` in `src/data/phonics.ts`). How natural it sounds depends on the device's voice. For the best result, add real recordings in `public/audio/phonics/` — see the README there. Recordings are picked up automatically.
+
+## Guided English, Hindi and Tamil
+
+Choose a language from the home screen. Each course shares a seven-step lesson
+player covering introduction, sound, vocabulary, repetition, recognition,
+practice and rewards. Tamil compound letters are organised by consonant into
+18 units of 12 lessons. The parent dashboard shows completed lessons,
+practice accuracy, stars, XP, streaks and suggested review.
+
+The curriculum lives in `src/learning/curriculum.ts`. Preserve lesson IDs when
+editing released content because child progress is stored by ID. The existing
+`wonderkids:v2` profile and subject stats migrate in place. Switching players
+archives the current local profile so children can return to it later.
+
+### Pictures and pronunciation
+
+The original storybook picture library is in `public/learning/pictures/`.
+Each picture has a 128px and 208px WebP variant. Legacy activities use the new
+art wherever a matching asset is available. A portion of legacy activity art
+and some new vocabulary still need picture coverage.
+
+Add reviewed native-speaker recordings to
+`public/learning/audio/{en,hi,ta}/{lesson-id}-{kind}.mp3` and include the
+root-relative paths in `src/learning/recordings.json`. Supported kinds are
+`name`, `sound`, `word` and `sentence`. Record isolated sounds without adding
+the English letter name or a trailing vowel. Confirm the recording's licence
+and native-speaker review before shipping it.
+
+This draft ships no reviewed recordings. Names, words and sentences can play
+through a matching device voice. Isolated sounds in the guided course require
+a recording. When audio is missing, children can continue with the visual
+lesson. Repetition is self-guided and does not grade spoken pronunciation.
+
+### Offline and verification
+
+The production service worker caches the app shell and script fonts during
+installation. Pictures and audio cache when requested while the worker is
+active. Open a lesson and play its clips while online before relying on those
+assets offline. Offline device speech depends on installed voices.
+
+```sh
+npm ci
+npm run lint
+npm test
+npm run build
+npx playwright install chromium
+npm run preview
+# In a second terminal
+npm run test:browser
+```
+
+The browser check writes English, Hindi, Tamil and picture-game screenshots to
+`artifacts/screenshots/`. GitHub Actions uploads them as a run artifact.
+Physical Android testing and native-language curriculum review are pending.

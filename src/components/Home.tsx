@@ -6,7 +6,10 @@ import { IconButton } from './ui/Button';
 import { MascotAvatar } from './ui/Mascot';
 import type { Profile, SectionDef } from '../types';
 
+import type { ReactNode } from 'react';
+
 interface Props {
+  languagePanel?: ReactNode;
   profile: Profile;
   soundOn: boolean;
   onToggleSound: () => void;
@@ -20,7 +23,7 @@ function suggestion(p: Profile): SectionDef {
     p.stats[a.id].xp - p.stats[b.id].xp || Number(!!b.isNew) - Number(!!a.isNew))[0];
 }
 
-export function Home({ profile, soundOn, onToggleSound, onOpen, onSignOut }: Props) {
+export function Home({ profile, soundOn, onToggleSound, onOpen, onSignOut, languagePanel }: Props) {
   const stars = totalXp(profile);
   const today = starsToday(profile);
   const goalPct = Math.min(1, today / DAILY_GOAL);
@@ -84,7 +87,7 @@ export function Home({ profile, soundOn, onToggleSound, onOpen, onSignOut }: Pro
           >
             <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/25 text-4xl">{pick.emoji}</span>
             <span className="flex-1">
-              <span className="block text-sm font-bold uppercase tracking-wider text-white/85">Let's play</span>
+              <span className="block text-sm font-bold uppercase tracking-wider text-white/85">Daily challenge</span>
               <span className="block text-2xl font-black leading-tight">{pick.title}</span>
             </span>
             <ChevronRight size={28} strokeWidth={3} />
@@ -92,7 +95,8 @@ export function Home({ profile, soundOn, onToggleSound, onOpen, onSignOut }: Pro
         </div>
       </motion.section>
 
-      <h2 className="mb-4 text-2xl font-black">Pick a subject</h2>
+      {languagePanel}
+      <h2 className="mb-4 mt-6 text-2xl font-black">Pick a subject</h2>
       <main className="mb-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
         {SECTIONS.map((s, i) => {
           const level = levelFor(profile, s.id);

@@ -1,3 +1,4 @@
+import { BigEmoji } from '../ui/Visuals';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -61,7 +62,7 @@ export function BlendIt({ words, onResult }: Props) {
       <div className="mb-5"><MascotSays>Tap each sound, then blend them together!</MascotSays></div>
 
       <div className="chunky overflow-hidden rounded-[2rem] bg-paper text-center">
-        <div className="bg-accent-soft py-6 text-9xl leading-none" aria-hidden>{word.emoji}</div>
+        <div className="flex justify-center bg-accent-soft py-6"><BigEmoji>{word.emoji}</BigEmoji></div>
         <div className="border-t-[3px] border-ink p-5 sm:p-7">
           <div className="mb-6 flex flex-wrap items-end justify-center gap-3">
             {word.units.map((u, idx) => (

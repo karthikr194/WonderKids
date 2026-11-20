@@ -10,6 +10,7 @@ export const SECTION_IDS: SectionId[] = [
 export interface SectionStats { xp: number; streak: number; correct: number; attempts: number }
 
 export interface Profile {
+  id?: string;
   name: string;
   age: number;
   avatar: string;

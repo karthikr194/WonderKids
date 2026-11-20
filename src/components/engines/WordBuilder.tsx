@@ -1,3 +1,4 @@
+import { BigEmoji } from '../ui/Visuals';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Delete } from 'lucide-react';
@@ -148,7 +149,7 @@ export function WordBuilder({ makeItem, level, rounds = 6, onResult, onExit }: P
 
       <div className="chunky mb-6 flex min-h-36 items-center justify-center gap-5 rounded-[2rem] bg-accent-soft p-5">
         {item.display && <span className="text-8xl font-black text-accent-deep">{item.display}</span>}
-        {item.emoji && <span className="text-8xl leading-none sm:text-9xl" aria-hidden>{item.emoji}</span>}
+        {item.emoji && <BigEmoji>{item.emoji}</BigEmoji>}
       </div>
 
       {/* answer slots */}
